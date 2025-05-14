@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <title>Logga in - MusketeerExam</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Logga in</h2>
+
+        <label for="role">Jag är:</label>
+        <select id="role">
+            <option value="student">Elev</option>
+            <option value="teacher">Lärare</option>
+        </select>
+
+        <label for="username">Användarnamn</label>
+        <input type="text" id="username" placeholder="Ange användarnamn">
+
+        <label for="password">Lösenord</label>
+        <input type="password" id="password" placeholder="Ange lösenord">
+
+        <button onclick="login()">Logga in</button>
+
+        <p id="error" class="error"></p>
+    </div>
+
+    <script>
+        const accounts = {
+            teacher: { username: "larare", password: "1234" },
+            students: [
+                { username: "Darin", password: "darin1" },
+                { username: "Oliver", password: "oliver1" },
+                { username: "Enlil", password: "enlil1" }
+            ]
+        };
+
+        function login() {
+            const role = document.getElementById("role").value;
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const errorElem = document.getElementById("error");
+
+            errorElem.textContent = "";
+
+            if (role === "teacher") {
+                if (username === accounts.teacher.username && password === accounts.teacher.password) {
+                    window.location.href = "lärarvy.html";
+                } else {
+                    errorElem.textContent = "Fel användarnamn eller lösenord för lärare.";
+                }
+            } else {
+                const student = accounts.students.find(s => s.username === username && s.password === password);
+                if (student) {
+                    const index = accounts.students.findIndex(s => s.username === username);
+sessionStorage.setItem("studentId", index + 1); // Spara ID i sessionStorage
+window.location.href = "elev.html"; // Alla skickas till samma sida
+
+                } else {
+                    errorElem.textContent = "Fel användarnamn eller lösenord för elev.";
+                }
+            }
+        }
+    </script>
+</body>
+</html>
