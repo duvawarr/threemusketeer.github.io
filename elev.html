@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <title>Elevvy - MusketeerExam</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="elev.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo"><h1>MusketeerExam</h1></div>
+            <nav><ul><li class="active"><a href="#">Min Sida</a></li></ul></nav>
+            <div class="user-panel">
+                <a href="login.html" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logga ut</a>
+            </div>
+        </header>
+
+        <main>
+            <div class="content-header">
+                <h2>Mitt Betyg</h2>
+            </div>
+
+            <div class="student-card">
+                <div class="student-info">
+                    <h3 id="student-name">Elev</h3>
+                    <p class="student-id" id="student-id">Student-ID: ...</p>
+                </div>
+                <div class="saved-info" id="student-data">
+                    <p>Betyg och kommentar läses in...</p>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <a href="https://web.skola24.se/timetable/timetable-viewer/arboga.skola24.se/H%C3%B6gskolecentrum/" 
+                       target="_blank" class="btn primary">
+                        📅 Gå till Schema (Skola24)
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function logout() {
+            sessionStorage.clear();
+        }
+
+        const studentId = sessionStorage.getItem("studentId");
+        const names = [
+            { name: "Darin Twana", id: "DT2023" },
+            { name: "Oliver Ullbrand", id: "OU2023" },
+            { name: "Enlil Hadad", id: "EH2023" }
+        ];
+
+        if (!studentId || studentId < 1 || studentId > names.length) {
+            alert("Ogiltig inloggning. Vänligen logga in igen.");
+            window.location.href = "login.html";
+        } else {
+            const info = names[studentId - 1];
+            document.getElementById("student-name").textContent = info.name;
+            document.getElementById("student-id").textContent = "Student-ID: " + info.id;
+
+            const saved = localStorage.getItem("student-" + studentId);
+            const display = document.getElementById("student-data");
+
+            if (saved) {
+                const data = JSON.parse(saved);
+                display.innerHTML = `
+                    <p><strong>Senast sparad:</strong> ${data.savedTime}</p>
+                    <p><strong>Betyg:</strong> <span class="grade-badge ${data.grade.toLowerCase()}">${data.grade}</span></p>
+                    <p><strong>Kommentar:</strong> ${data.comment || "Ingen kommentar tillagd"}</p>
+                `;
+            } else {
+                display.innerHTML = `<p>Inga betyg har ännu satts.</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
