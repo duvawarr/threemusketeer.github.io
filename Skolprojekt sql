@@ -1,0 +1,85 @@
+CREATE DATABASE skolprojekt;
+GO
+
+USE skolprojekt;
+GO
+
+-- Tabell Roller: innehåller olika roller (t.ex. Lärare, Elev)
+CREATE TABLE [Roller] (
+[RollID] INT IDENTITY(1,1) PRIMARY KEY, -- Primärnyckel (unik roll)
+[RollNamn] NVARCHAR(20) NOT NULL -- Namn på rollen, t.ex. 'Lärare' eller 'Elev'
+);
+GO
+
+-- Tabell Användare: innehåller alla användare (lärare och elever)
+-- [RollID] refererar till tabellen Roller för att ange användarens roll
+CREATE TABLE [Användare] (
+[AnvändarID] INT IDENTITY(1,1) PRIMARY KEY, -- Primärnyckel (unik användar-ID)
+[Namn] NVARCHAR(50) NOT NULL, -- Användarens namn
+[Lösenord] NVARCHAR(50) NOT NULL, -- Lösenord för inloggning
+[RollID] INT NOT NULL, -- Främmande nyckel till Roller (användarroll)
+CONSTRAINT [FK_Anvandare_Roller] FOREIGN KEY ([RollID]) REFERENCES [Roller]([RollID])
+);
+GO
+
+-- Tabell Betyg: lagrar elevernas betyg i olika ämnen
+-- Innehåller FK till Användare för både elev och lärare (som satt betyget)
+CREATE TABLE [Betyg] (
+[BetygID] INT IDENTITY(1,1) PRIMARY KEY, -- Primärnyckel (unik betygspost)
+[ElevID] INT NOT NULL, -- Främmande nyckel till Användare (eleven som fått betyget)
+[LärarID] INT NOT NULL, -- Främmande nyckel till Användare (läraren som satt betyget)
+[Ämne] NVARCHAR(50) NOT NULL, -- Ämnets namn (t.ex. 'Matematik')
+[Betygsvärde] NVARCHAR(2) NOT NULL, -- Betygsbeteckning (t.ex. A-F)
+CONSTRAINT [FK_Betyg_Elev] FOREIGN KEY ([ElevID]) REFERENCES [Användare]([AnvändarID]),
+CONSTRAINT [FK_Betyg_Larar] FOREIGN KEY ([LärarID]) REFERENCES [Användare]([AnvändarID])
+);
+GO
+
+-- Tabell Skola24Länk: lagrar en Skola24-schema-länk per användare
+CREATE TABLE [Skola24Länk] (
+[LänkID] INT IDENTITY(1,1) PRIMARY KEY, -- Primärnyckel (unik länk-ID)
+[AnvändarID] INT NOT NULL, -- Främmande nyckel till Användare
+[Länk] NVARCHAR(255) NOT NULL, -- URL till användarens Skola24-schema
+CONSTRAINT [FK_Skola24Lank_Anvandare] FOREIGN KEY ([AnvändarID]) REFERENCES [Användare]([AnvändarID]),
+CONSTRAINT [UQ_Skola24Lank_Anvandare] UNIQUE ([AnvändarID])
+);
+GO
+
+-- Tabell Utvecklare: lagrar information om utvecklarna (för "Om oss")
+CREATE TABLE [Utvecklare] (
+[UtvecklarID] INT IDENTITY(1,1) PRIMARY KEY, -- Primärnyckel (unik utvecklar-ID)
+[Namn] NVARCHAR(50) NOT NULL, -- Utvecklarens namn
+[Epost] NVARCHAR(50) NOT NULL, -- E-postadress
+[Telefonnummer] NVARCHAR(20) NOT NULL -- Telefonnummer
+);
+GO
+
+-- Infoga roller (lärare och elev)
+INSERT INTO [Roller] ([RollNamn]) VALUES
+(N'Lärare'),
+(N'Elev');
+
+-- Infoga användare (1 lärare och 3 elever med lösenord)
+INSERT INTO [Användare] ([Namn],[Lösenord],[RollID]) VALUES
+(N'Lisa', N'lisa123', 1), -- Lärare (RollID=1)
+(N'Enlil', N'enlil123', 2), -- Elev (RollID=2)
+(N'Darin', N'darin123', 2), -- Elev (RollID=2)
+(N'Oliver', N'oliver123', 2); -- Elev (RollID=2)
+
+-- Infoga betyg (exempel: Matematik-betyg för varje elev, satt av Lisa)
+INSERT INTO [Betyg] ([ElevID],[LärarID],[Ämne],[Betygsvärde]) VALUES
+(2, 1, N'Matematik', N'A'), -- Enlil får A i Matematik av lärare Lisa
+(3, 1, N'Matematik', N'C'), -- Darin får C i Matematik av lärare Lisa
+(4, 1, N'Matematik', N'B'); -- Oliver får B i Matematik av lärare Lisa
+
+-- Infoga Skola24-länkar (en länk per användare)
+INSERT INTO [Skola24Länk] ([AnvändarID],[Länk]) VALUES
+(1, N'https://www.skola24.se/schema/lisa'), -- Lisas (lärare) schema-länk
+(2, N'https://www.skola24.se/schema/enlil'), -- Enlils schema-länk
+(3, N'https://www.skola24.se/schema/darin'), -- Darins schema-länk
+(4, N'https://www.skola24.se/schema/oliver'); -- Olivers schema-länk
+
+-- Infoga utvecklarinfo (namn, e-post, telefonnummer)
+INSERT INTO [Utvecklare] ([Namn],[Epost],[Telefonnummer]) VALUES
+(N'enlil', N'enlil@example.com', '0701234567'), -- Utvecklare 1
+(N'enlil', N'enlil@example.com', '0707654321'); -- Utvecklare 2
