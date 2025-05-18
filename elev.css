@@ -1,3 +1,4 @@
+/* Student view specific styles */
 .saved-info {
     margin-top: 20px;
     padding: 20px;
@@ -31,4 +32,30 @@
 
 .grade-badge.vg {
     background-color: #3182ce;
+}
+
+/* Schedule button styling */
+.schedule-btn {
+    display: inline-block;
+    margin-top: 20px;
+    text-decoration: none;
+    padding: 10px 16px;
+    background-color: #4285f4;
+    color: white;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.schedule-btn:hover {
+    background-color: #3367d6;
+}
+
+/* Improved container for student information */
+.student-profile {
+    background-color: #f8fafc;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    padding: 30px;
+    margin-top: 20px;
 }

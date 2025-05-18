@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MusketeerExam - Lärarvy</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="lärarvy.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
 </head>
 <body>
@@ -16,14 +16,12 @@
             <nav>
                 <ul>
                     <li class="active"><a href="#"><i class="fas fa-home"></i> Översikt</a></li>
+                    <li><a href="https://web.skola24.se/timetable/timetable-viewer/arboga.skola24.se/H%C3%B6gskolecentrum/" target="_blank"><i class="fas fa-calendar-alt"></i> Schema</a></li>
                 </ul>
             </nav>
             <div class="user-panel">
                 <a href="support.html"><i class="fas fa-question-circle"></i> Support</a>
-
-                <!-- <a href="#"><i class="fas fa-question-circle"></i> Support</a> -->
-                <a href="#"><i class="fas fa-cog"></i> Inställningar</a>
-                <a href="#"><i class="fas fa-sign-out-alt"></i> Logga ut</a>
+                <a href="login.html" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logga ut</a>
             </div>
         </header>
         
@@ -46,6 +44,15 @@
                         <option value="grade-desc">Betyg (Fallande)</option>
                     </select>
                 </div>
+                <div class="course-select">
+                    <label for="course">Kurs:</label>
+                    <select id="course" onchange="changeCourse()">
+                        <option value="databas">Databas</option>
+                        <option value="os">OS System</option>
+                        <option value="cloud">Cloud</option>
+                        <option value="programmering">Programmering</option>
+                    </select>
+                </div>
                 <div class="search">
                     <input type="text" id="searchInput" placeholder="Filtrera på namn" oninput="filterStudents()">
                     <i class="fas fa-search"></i>
@@ -57,7 +64,7 @@
                 <div class="student-card" id="student-1">
                     <div class="student-info">
                         <h3>Darin Twana</h3>
-                        <p class="student-id">Student-ID: DT2023</p>
+                        <p class="student-id">Student-ID: DT2025</p>
                     </div>
                     <div class="grade-section">
                         <div class="grade-select">
@@ -82,7 +89,7 @@
                 <div class="student-card" id="student-2">
                     <div class="student-info">
                         <h3>Oliver Ullbrand</h3>
-                        <p class="student-id">Student-ID: OU2023</p>
+                        <p class="student-id">Student-ID: OU2025</p>
                     </div>
                     <div class="grade-section">
                         <div class="grade-select">
@@ -107,7 +114,7 @@
                 <div class="student-card" id="student-3">
                     <div class="student-info">
                         <h3>Enlil Hadad</h3>
-                        <p class="student-id">Student-ID: EH2023</p>
+                        <p class="student-id">Student-ID: EH2025</p>
                     </div>
                     <div class="grade-section">
                         <div class="grade-select">
@@ -132,7 +139,46 @@
     </div>
 
     <script>
+        // Get current course
+        function getCurrentCourse() {
+            return document.getElementById('course').value;
+        }
+        
+        // Logout function
+        function logout() {
+            sessionStorage.clear();
+            localStorage.removeItem("currentUser");
+            // Remove teacher flag
+            localStorage.removeItem("isTeacher");
+            // Redirect to login page
+            window.location.href = "login.html";
+        }
+        
+        // Set teacher flag when page loads
+        window.onload = function() {
+            // Mark this user as a teacher for return navigation
+            localStorage.setItem("isTeacher", "true");
+            
+            // Get the current course
+            const course = getCurrentCourse();
+            
+            // Load data for each student based on selected course
+            for (let i = 1; i <= 3; i++) {
+                loadStudentData(i, course);
+            }
+        };
+        
+        // Change course function
+        function changeCourse() {
+            const course = getCurrentCourse();
+            // Load data for each student based on selected course
+            for (let i = 1; i <= 3; i++) {
+                loadStudentData(i, course);
+            }
+        }
+        
         function saveStudentData(studentId) {
+            const course = getCurrentCourse();
             const grade = document.getElementById(`grade-${studentId}`).value;
             const comment = document.getElementById(`comment-${studentId}`).value;
             const savedDataElement = document.getElementById(`saved-data-${studentId}`);
@@ -150,23 +196,54 @@
             savedDataElement.innerHTML = `
                 <div class="saved-info">
                     <p><strong>Senast sparad:</strong> ${dateTime}</p>
+                    <p><strong>Kurs:</strong> ${document.getElementById('course').options[document.getElementById('course').selectedIndex].text}</p>
                     <p><strong>Betyg:</strong> <span class="grade-badge ${grade.toLowerCase()}">${grade}</span></p>
                     <p><strong>Kommentar:</strong> ${comment || "Ingen kommentar tillagd"}</p>
                 </div>
             `;
             
-            // Save to localStorage
+            // Save to localStorage with course-specific key
             const studentData = {
                 id: studentId,
                 grade: grade,
                 comment: comment,
-                savedTime: dateTime
+                savedTime: dateTime,
+                course: course
             };
             
-            localStorage.setItem(`student-${studentId}`, JSON.stringify(studentData));
+            // Store data with course-specific key
+            localStorage.setItem(`student-${studentId}-${course}`, JSON.stringify(studentData));
             
             // Show confirmation
-            alert(`Betyg och kommentar sparad för student ${document.querySelector(`#student-${studentId} h3`).textContent}!`);
+            alert(`Betyg och kommentar sparad för student ${document.querySelector(`#student-${studentId} h3`).textContent} i kursen ${document.getElementById('course').options[document.getElementById('course').selectedIndex].text}!`);
+        }
+        
+        // Load student data based on course
+        function loadStudentData(studentId, course) {
+            const savedData = localStorage.getItem(`student-${studentId}-${course}`);
+            const gradeSelect = document.getElementById(`grade-${studentId}`);
+            const commentField = document.getElementById(`comment-${studentId}`);
+            const savedDataElement = document.getElementById(`saved-data-${studentId}`);
+            
+            // Clear previous data
+            gradeSelect.value = "";
+            commentField.value = "";
+            savedDataElement.innerHTML = "";
+            
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                gradeSelect.value = data.grade;
+                commentField.value = data.comment;
+                
+                savedDataElement.innerHTML = `
+                    <div class="saved-info">
+                        <p><strong>Senast sparad:</strong> ${data.savedTime}</p>
+                        <p><strong>Kurs:</strong> ${document.getElementById('course').options[document.getElementById('course').selectedIndex].text}</p>
+                        <p><strong>Betyg:</strong> <span class="grade-badge ${data.grade.toLowerCase()}">${data.grade}</span></p>
+                        <p><strong>Kommentar:</strong> ${data.comment || "Ingen kommentar tillagd"}</p>
+                    </div>
+                `;
+            }
         }
         
         // Filter students by name
@@ -223,26 +300,6 @@
             studentCards.forEach(card => studentList.removeChild(card));
             studentCards.forEach(card => studentList.appendChild(card));
         }
-        
-        // Load saved data on page load
-        window.onload = function() {
-            for (let i = 1; i <= 3; i++) {
-                const savedData = localStorage.getItem(`student-${i}`);
-                if (savedData) {
-                    const data = JSON.parse(savedData);
-                    document.getElementById(`grade-${i}`).value = data.grade;
-                    document.getElementById(`comment-${i}`).value = data.comment;
-                    
-                    document.getElementById(`saved-data-${i}`).innerHTML = `
-                        <div class="saved-info">
-                            <p><strong>Senast sparad:</strong> ${data.savedTime}</p>
-                            <p><strong>Betyg:</strong> <span class="grade-badge ${data.grade.toLowerCase()}">${data.grade}</span></p>
-                            <p><strong>Kommentar:</strong> ${data.comment || "Ingen kommentar tillagd"}</p>
-                        </div>
-                    `;
-                }
-            }
-        };
     </script>
 </body>
 </html>
