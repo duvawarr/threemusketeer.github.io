@@ -35,15 +35,6 @@ CONSTRAINT [FK_Betyg_Larar] FOREIGN KEY ([LärarID]) REFERENCES [Användare]([An
 );
 GO
 
--- Tabell Skola24Länk: lagrar en Skola24-schema-länk per användare
-CREATE TABLE [Skola24Länk] (
-[LänkID] INT IDENTITY(1,1) PRIMARY KEY, -- Primärnyckel (unik länk-ID)
-[AnvändarID] INT NOT NULL, -- Främmande nyckel till Användare
-[Länk] NVARCHAR(255) NOT NULL, -- URL till användarens Skola24-schema
-CONSTRAINT [FK_Skola24Lank_Anvandare] FOREIGN KEY ([AnvändarID]) REFERENCES [Användare]([AnvändarID]),
-CONSTRAINT [UQ_Skola24Lank_Anvandare] UNIQUE ([AnvändarID])
-);
-GO
 
 -- Tabell Utvecklare: lagrar information om utvecklarna (för "Om oss")
 CREATE TABLE [Utvecklare] (
@@ -72,12 +63,6 @@ INSERT INTO [Betyg] ([ElevID],[LärarID],[Ämne],[Betygsvärde]) VALUES
 (3, 1, N'Matematik', N'C'), -- Darin får C i Matematik av lärare Lisa
 (4, 1, N'Matematik', N'B'); -- Oliver får B i Matematik av lärare Lisa
 
--- Infoga Skola24-länkar (en länk per användare)
-INSERT INTO [Skola24Länk] ([AnvändarID],[Länk]) VALUES
-(1, N'https://www.skola24.se/schema/lisa'), -- Lisas (lärare) schema-länk
-(2, N'https://www.skola24.se/schema/enlil'), -- Enlils schema-länk
-(3, N'https://www.skola24.se/schema/darin'), -- Darins schema-länk
-(4, N'https://www.skola24.se/schema/oliver'); -- Olivers schema-länk
 
 -- Infoga utvecklarinfo (namn, e-post, telefonnummer)
 INSERT INTO [Utvecklare] ([Namn],[Epost],[Telefonnummer]) VALUES
